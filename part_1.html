@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+	<title> A tribute to Hans Rosling </title>
+</head>
+<style>
+	html {
+		min-height: 1000px;
+	}
+
+	input[type='range'] { /* range to allow user to select year */
+		-webkit-appearance: none !important; /* hide browser slider for custom slider */
+		-webkit-border-radius: 5px;
+		background-color: rgb(53, 135, 212);
+		height: 10px;
+		width: 200px; /* specific width required for Firefox */
+		margin: 20px;
+
+	}
+
+	input[type='range']::-webkit-slider-thumb {
+		-webkit-appearance: none !important;
+		-webkit-border-radius: 15px;
+		background-color: #bbb;
+		background-image: -webkit-gradient(linear, left top, left bottom, from(#bbb), to(#888));
+		border: 1px solid #000;
+		height: 25px;
+		width: 25px;
+	}
+
+	.axis path {
+		fill: none;
+		stroke: #000;
+		shape-rendering: crispEdges;
+		display: inline;
+	}
+	.axis line {
+		fill: none;
+		stroke: #000;
+		shape-rendering: crispEdges;
+		display: inline;
+	}
+
+	#range {
+		font: 17px sans-serif;
+	}
+
+	input[type=range] {
+        border: 1px solid black;
+	}
+
+	div.tooltip { /* tooltip appears when user moves mouse over an element */
+		text-align: left;
+		margin: 5px;
+		font: 12px sans-serif;
+		border-radius: 18px; /*displays around hoverable element */
+	}
+    
+    .tooltip{
+        position: absolute;
+        width: 200px;
+        height: 28px;
+        pointer-events: none;
+    }
+
+	.chart { 
+		width: 75%;
+		height: 600px;
+        margin-bottom: 50px;
+        position: relative;
+	}
+
+    #description{
+        position: relative;
+    }
+    
+	button { /* play button */
+		width: 4em;
+		height: 2em;
+/*		background: rgb(53, 135, 212);*/
+/*		border: 1px solid black;*/
+		border-radius: 4px;
+		color: white;
+		font-size: 1.5em;
+		margin-left: 12px; /* space between year and button */
+	}
+
+
+	.label {  /* axes labels */
+		font-size: 1.2em; 
+	}
+    
+    header {
+		background: rgb(53, 135, 212);
+		border: 1.5px solid black;
+		border-radius: 4px;
+		color: white;
+		font-size: 14px;
+		margin-left: 10px;
+        padding-left: 30px;
+        padding-bottom: 7px;
+        margin-bottom: 10px;
+    }
+    
+    p {
+        margin-left: 40px;
+        margin-right: 60px;
+        font-size: 12px;
+        font-family: sans-serif;
+        text-align: justify;
+    }
+
+</style>
+
+<body>
+
+    
+	<!-- create slider to allow user to select year
+	value: set to first year of data (default is median value)
+	min: set to first year of data
+	max: set to last year of data
+	setp: scale factor, set to one so incremeent per year
+	 -->
+	<input id="slider" type="range" min="1900" max="2015" value="1900" step="1" />
+    
+	<!-- display first year -->
+	<span id="range">1900</span>
+    
+	<!-- include play button so user can start and pause vis animation -->
+	<button name="play" id="play">Play</button>
+    
+	<!-- create chart div -->
+	<div id="chart"></div>
+
+    <!--    create barplot div -->
+    <div id="barplot"></div>
+    
+	<!-- call d3 library -->
+	<script src="http://d3js.org/d3.v4.min.js"></script>
+    
+	<!-- link to google repo of jQuery-->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    
+    
+	<!-- import script to create and display visualisation -->
+	<script src="script.js"></script>
+    
+        <br><br><br>
+    
+    <script src="barplot.js"></script>
+
+
+</body>
