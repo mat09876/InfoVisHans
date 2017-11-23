@@ -28,7 +28,7 @@
 
 <body>
     <div class="demo">
-        <h3 id="year_header">Year: 2013</h3>
+        <h3 id="year_header">Year: 1990</h3>
         <script type="text/javascript">
             // Define margins
             var margin = {
@@ -39,13 +39,13 @@
             };
 
             //Width and height
-            var outer_width = 1000;
+            var outer_width = 750;
             var outer_height = 120;
             var svg_width = outer_width - margin.left - margin.right;
-            var svg_height = outer_height - margin.top - margin.bottom;
+            var svg_height = outer_height - margin.top - margin.bottom;        
 
             // The year to display
-            display_year = 2013;
+            display_year = 1900;
 
             // define a function that filters data by year
             function yearFilter(value) {
@@ -96,6 +96,27 @@
 
                 // Filter the data to only include the current year
                 var filtered_datset = dataset.filter(yearFilter);
+                
+                d3.csv("Gapminder_All_Time.csv", function(error, data){
+
+                // handle any data loading errors
+                if (error) {
+                    console.log("Something went wrong");
+                    console.log(error);
+                } else {
+                    console.log("Data Loaded");
+
+                    // Assign  the data object loaded to the global dataset variable
+                    dataset = data;
+                    
+                    var nested_data = d3.nest()
+                    .key(function(d) { return d.Region; })
+                    .key(function(d) { return d.Country; })
+                    .rollup(function(leaves) { return leaves.length; })
+                    .entries(data);
+
+                    for (var item in nested_data) { console.log(nested_data[item].key +'--'+ Object.keys(nested_data[item].values).length);}
+                }});
 
                 /******** PERFORM DATA JOIN ************/
                 // Join new data with old elements, if any.
@@ -113,11 +134,11 @@
                         return xScale(d.Region);
                     })
                     .attr("y", function(d) {
-                        return yScale(+d.Share);
+                        return yScale(+d.nested_data);
                     })
                     .attr("width", xScale.bandwidth())
                     .attr("height", function(d) {
-                        return svg_height - yScale(+d.Share);
+                        return svg_height - yScale(+d.nested_data);
                     })
                     .style("fill", "Green");
 
@@ -138,10 +159,10 @@
                     .transition()
                     .duration(1000)
                     .attr("y", function(d) {
-                        return yScale(+d.Share);
+                        return yScale(+d.nested_data);
                     })
                     .attr("height", function(d) {
-                        return svg_height - yScale(+d.Share);
+                        return svg_height - yScale(+d.nested_data);
                     });
 
                 /******** HANDLE EXIT SELECTION ************/
@@ -163,8 +184,7 @@
             }
 
             // Load the file data.csv and generate a visualisation based on it
-//            d3.csv("./data/BroadbandMarketshare2013_2015.csv", function(error, data)
-            d3.csv("/Gapminder_All_Time.csv", function(error, data){
+            d3.csv("Gapminder_All_Time.csv", function(error, data){
 
                 // handle any data loading errors
                 if (error) {
@@ -175,6 +195,15 @@
 
                     // Assign  the data object loaded to the global dataset variable
                     dataset = data;
+                    
+                    var nested_data = d3.nest()
+                    .key(function(d) { return d.Region; })
+                    .key(function(d) { return d.Country; })
+                    .rollup(function(leaves) { return leaves.length; })
+                    .entries(data);
+
+                    for (var item in nested_data) { console.log(nested_data[item].key +'--'+ Object.keys(nested_data[item].values).length);}
+                    
 
                     // Update the domain of the x scale
                     xScale.domain(dataset.map(function(d) {
