@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+<style>
+body {
+  font: 16px sans-serif;
+}
+rect:hover {
+    fill: #FFA623;  /* fill with a yellow */
+}
+#tooltip {
+    position: absolute;
+    padding: 5px 10px; 
+    background: white; 
+    border-radius: 3px; 
+    font-family: dosis;   /* we need to import this font*/
+    font-weight: bold;  
+}
+.hidden {
+    display: none;  
+}
+.axis text {
+  font: 10px sans-serif;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+
+</head>
+<body>
+     
+</body>
+<script>
+//place you D3 code here
+var svgWidth = 1200,
+    svgHeight = 400;
+
+var margin = {top: 50, right: 0, bottom: 50, left: 50},
+canvasWidth = svgWidth + margin.right + margin.left;
+canvasHeight = svgHeight + margin.top + margin.bottom;
+ 
+var spacing= 2;
+//see http://learnjsdata.com/group_data.html
+d3.csv("dummyData.csv", function(error, myData) {
+    myData.forEach(function(d) {
+       d.date = new Date(d.purchase_date.slice(0,10));
+       d.price = +((d.ticket_price).slice(1));   //the + here converts to a number
+     });
+	 
+ /*var ticketPrice = d3.nest()
+  .key(function(d) { return d.date; })
+  .entries(myData);*/
+
+var priceCount = d3.nest()
+  .key(function(d) { return new Date(d.date); })
+  .rollup(function(v) { return {
+    count: v.length,
+    total: d3.sum(v, function(d) { return d.price; })  
+  }; })
+  .entries(myData);
+  
+priceCount.forEach(function(d) {
+       d.date = (d.key);
+       d.score = +d.values.count;   //the + here converts to a number
+     });
+myData=priceCount;
+myData = myData.sort(function (a,b) {return d3.ascending(new Date(a.date), new Date(b.date)); });
+ // Set the scales
+var minDate = d3.min(myData, function(d) { return new Date(d.date); });
+//minDate.setDate(minDate.getDate() - 1);
+
+var maxDate = d3.max(myData, function(d) { return new Date(d.date); });
+
+// Parse the date / time
+var	parseDate = d3.time.format("%Y-%m").parse;
+
+var xAxisScale = d3.scale.ordinal()
+		.domain(myData.map(function(d) { return new Date(d.date); }))
+		.rangeRoundBands([0, svgWidth]);
+           	
+  
+var heightScale = d3.scale.linear()
+                    .domain([0,d3.max(myData, function(d) {return d.score})])
+                    .range([0,svgHeight]);
+					
+var yAxisScale = d3.scale.linear()
+  .domain([0, d3.max(myData, function(d) {return d.score})])
+  .range([svgHeight , 0]);
+  
+var colorScale = d3.scale.linear()
+                   .domain([0,d3.max(myData, function(d) {return d.score})])
+                   .range(["blue","red"]);
+var tooltip = d3.select("body")
+                 .append("div")
+				 .classed("hidden",true)
+                 .attr("id","tooltip");	
+				 
+var yAxis = d3.svg.axis()
+              .scale(yAxisScale)
+              .orient("left")
+              .ticks(5);
+			  
+var format = d3.time.format("%d %b");			  
+var xAxis = d3.svg.axis()
+    .scale(xAxisScale)
+    .orient("bottom")
+	.tickFormat(format);
+	
+			  
+var canvas = d3.select("body")
+            .append("svg")
+            .attr("width",canvasWidth)
+            .attr("height",canvasHeight)
+            .attr("style","background-color:#ddd"); /* added some style*/
+			
+canvas.append("g")
+  .attr("class","axis")  // style axis via CSS
+  .attr("transform","translate("+ (margin.left - 2) +"," + margin.bottom + ")")
+  .call(yAxis);
+
+canvas.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate("+ margin.left +","+ (canvasHeight - (margin.bottom - 2)) + ")")
+    .call(xAxis)
+	.selectAll("text")
+      .style("text-anchor", "end")
+      .attr("dx", "-.8em")
+      .attr("dy", "-.55em")
+      .attr("transform", "rotate(-90)" );
+  
+			
+var g = canvas.append("g")
+            .attr("width",svgWidth)
+            .attr("height",svgHeight)
+            .attr("style","background-color:#ddd")
+			.attr("transform","translate("+ margin.left +"," + margin.bottom + ")");
+	
+	g.selectAll("rect")
+		   .data(myData)
+		   .enter()
+		   .append("rect")  
+		   .attr("x", function(d, i) {return i * (svgWidth / myData.length);})  
+		   .attr("y", function(d){return svgHeight - heightScale(d.score);}) 
+		   .attr("width", (svgWidth / myData.length) - spacing)
+		   .attr("height", function(d){return heightScale(d.score)})
+		   .attr("fill", function(d){return(colorScale(d.score));})
+		   .on("mouseover", function(d){    
+			d3.select("#tooltip")
+			  .style("left", d3.event.pageX + "px")
+			  .style("top", d3.event.pageY - 50 + "px")
+			  .classed("hidden", false)
+			  tooltip.html(d.score);            
+			})
+			.on("mouseout", function(){    
+			d3.select("#tooltip")
+			  .classed("hidden", true);            
+			});
+			 
+     });         
+</script>
+<!-- <script src="js/script.js"></script> -->
+</html>
